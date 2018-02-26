@@ -1,0 +1,19 @@
+gdax:
+  api:
+    baseUrl: "https://api.gdax.com/"
+  key: ""
+  secret: ""
+  passphrase: ""
+  defaultProduct: "BTC-GBP"
+
+websocket:
+  baseUrl: "wss://ws-feed.gdax.com/"
+  enabled: true
+
+liveorderbook:
+  defaultProduct: "BTC-GBP"
+  timeout: 15
+
+gui:
+  enabled: true
+
