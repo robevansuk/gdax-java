@@ -75,7 +75,7 @@ public class LiveOrderBook {
     }
 
     public void initBidsAndAsksAndMaxSequenceId(MarketData data) {
-        log.info("Init bid/ask data and max sequence ID");
+        log.info("Init bid/ask data and max sequence ID: {}", data.getSequence());
         // bids - we want to display best at top (highest), lowest at bottom.
         // bids come in in that order.
         for (int i = data.getBids().size() - 1; i >= 0; i--) {
@@ -111,19 +111,23 @@ public class LiveOrderBook {
             log.error("Message {} not received in time. Restarting Orderbook.", nextSeqIdToExpect);
             // resubscribe
             sequenceLastProcessedTimeStamp = System.currentTimeMillis();
-            websocketFeed.subscribe(productId, this);
+            loadLiveOrderBookModel(productId);
+
+        }
+        if(message.getType().equals("change") || message.getType().equals("activate")) {
+            log.error("Change message received");
         }
         if (isReady) {
-            log.info("Next Update: {}", nextSeqIdToExpect);
             long sequenceId = message.getSequence();
             sequenceLastProcessedTimeStamp = System.currentTimeMillis();
             if (isOutOfSequence(message)) {
+                log.info("out of sequence message queued: {}", message.getSequence());
                 queueMessage(message);
             } else {
                 if (isMessageTypeWeCareAbout(message)) {
                     updateOrderBook(message);
                 } else {
-                    log.error("IGNORED: {}, Type {}, {}, price {}", sequenceId, message.getType(),
+                    log.info("IGNORED: {}, Type {}, {}, price {}", sequenceId, message.getType(),
                             message.getSize() == null ? "remainingSize " + message.getRemaining_size() : "size " + message.getSize(),
                             message.getPrice());
                 }
@@ -133,6 +137,7 @@ public class LiveOrderBook {
                 nextSeqIdToExpect = nextSeqIdToExpect + 1;
             }
         } else {
+            log.info("message queued order book not ready: {}, {}", message.getSequence(), message);
             queueMessage(message);
         }
     }

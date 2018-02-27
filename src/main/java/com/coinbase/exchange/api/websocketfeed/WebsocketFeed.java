@@ -108,6 +108,12 @@ public class WebsocketFeed {
         }
     }
 
+    @OnError
+    public void onError(Session s, Throwable t){
+        log.error("WebsocketFeed error!!!");
+        t.printStackTrace();
+    }
+
     public void setMessageHandler(MessageHandler msgHandler) {
         this.messageHandler = msgHandler;
     }
@@ -129,6 +135,7 @@ public class WebsocketFeed {
                     log.info(json);
                     OrderBookMessage message = getObject(json, new TypeReference<OrderBookMessage>() {
                     });
+//                    log.info("Message Recieved: {}", message.getSequence());
                     publish(message);
                     return null;
                 }

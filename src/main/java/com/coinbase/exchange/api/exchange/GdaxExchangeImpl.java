@@ -142,7 +142,7 @@ public class GdaxExchangeImpl implements GdaxExchange {
             headers.add("CB-ACCESS-SIGN", signature.generate(resource, method, jsonBody, timestamp));
         } catch (RuntimeException ex) {
             ex.printStackTrace();
-            System.exit(1);
+            System.exit(1); // you didn't set your api key/secret/passphrase variables correctly.
         }
         headers.add("CB-ACCESS-TIMESTAMP", timestamp);
         headers.add("CB-ACCESS-PASSPHRASE", passphrase);
