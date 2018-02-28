@@ -512,6 +512,31 @@ public class LiveOrderBookTest {
         }
     }
 
+    /**
+     * IOC - immediate or cancel. buy/sell as much at a certain price, cancel any unfilfilled portion of the order.
+     * This trade has the following lifecycle:
+     * 1. order is received - price may be above the lowest ask, or for a sell below the lowest bid.
+     * 2. this will result in matches (possibly at a better/different price)
+     * 3. anything outstanding will be cancelled. No order will be opened on the book following the received message
+     * Cancel orders should not result in new price entries on the orderbook.
+     */
+    @Test
+    public void shouldNotCreateNewEntriesInTheOrderBookWhenACanceledOrderIsReceived() {
+        OrderBookMessage cancelOrderNotInBook = getOrderFromFile("/testdata/cancelSell_priceDoesNotExist_001.json");
+        BigDecimal priceEntry = new BigDecimal(7940.26).setScale(8, ROUND_HALF_UP);
+        int index = getPriceEntryIndex(testObject.getAsks(),priceEntry);
+        assertThat(index).isEqualTo(-1);
+
+        // note: sequence ID must be in sequence
+        // remaining size - the outstanding amount of the order to cancel - but do not create new entry if
+        // price point does not exist.
+        testObject.handleMessages(cancelOrderNotInBook); // price: 7940.26, remaining_size: 1.874
+
+        // rounding necessary here since the big decimal doesn't compare how we'd expect otherwise.
+        index = getPriceEntryIndex(testObject.getAsks(), priceEntry);
+        assertThat(index).isEqualTo(-1);
+    }
+
     private OrderBookMessage sellMessage() {
         OrderBookMessage message = new OrderBookMessage();
         message.setOrder_type(LIMIT_ORDER_TYPE);

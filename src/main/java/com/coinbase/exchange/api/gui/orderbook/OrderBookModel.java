@@ -247,6 +247,11 @@ public class OrderBookModel implements TableModel, TableModelListener {
                 && item.getReason() != null && item.getReason().equals(CANCELED);
     }
 
+    private boolean isCanceledOrder(OrderBookMessage item) {
+        return item.getType() != null && item.getType().equals(DONE)
+                && item.getReason() != null && item.getReason().equals(CANCELED);
+    }
+
     private void createNewEntry(OrderItem item, Vector vector, int rowIndex) {
         if (!isDoneFilledOrder(item)) {
             data.insertElementAt(vector, rowIndex);
@@ -273,14 +278,14 @@ public class OrderBookModel implements TableModel, TableModelListener {
                 && item.getReason() != null && item.getReason().equals(FILLED);
     }
 
-    public int insertInto(OrderBookMessage msg) {
+    public void insertInto(OrderBookMessage msg) {
 
         List<OrderBookMessage> orderIndex = getListOfAllRelevantOrders(msg);
         Comparator<OrderBookMessage> priceComparator = orderBookMessagePriceComparator();
 
         int index = Collections.binarySearch(orderIndex, msg, priceComparator);
 
-        if (index < 0) {
+        if (index < 0 && !isCanceledOrder(msg)) {
             // item did not exist so negative index for the insertion point was returned
             // insert item at this point
             index = (index * -1) - 1;
@@ -298,8 +303,9 @@ public class OrderBookModel implements TableModel, TableModelListener {
             updateExistingEntry(convertToOrderItem(msg), index);
         }
 
-        validateOrderBookElseRemoveRow(index);
-        return index;
+        if (index >=0) {
+            validateOrderBookElseRemoveRow(index);
+        }
     }
 
     private boolean isDoneFilledOrder(OrderBookMessage message) {
