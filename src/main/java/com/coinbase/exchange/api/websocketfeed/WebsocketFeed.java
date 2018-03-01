@@ -1,7 +1,7 @@
 package com.coinbase.exchange.api.websocketfeed;
 
 import com.coinbase.exchange.api.exchange.Signature;
-import com.coinbase.exchange.api.gui.orderbook.LiveOrderBook;
+import com.coinbase.exchange.api.gui.orderbook.GdaxLiveOrderBook;
 import com.coinbase.exchange.api.websocketfeed.message.OrderBookMessage;
 import com.coinbase.exchange.api.websocketfeed.message.Subscribe;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -122,7 +122,7 @@ public class WebsocketFeed {
         this.userSession.getAsyncRemote().sendText(message);
     }
 
-    public void subscribe(String productId, LiveOrderBook liveOrderBook) {
+    public void subscribe(String productId, GdaxLiveOrderBook liveOrderBook) {
         log.info("Subscribing to {}", productId);
         setSubscribedChannels(productId);
         Subscribe msg = new Subscribe((String[]) Arrays.asList(productId).toArray());

@@ -50,7 +50,10 @@ Please see CONTRIBUTE.md if your interested in getting involved.
 
 To build and run the application you can use the gradle script - this requires no installation as the "gradle wrapper" is included as part of the source code. All you need to do is:
 
-1. supply your API keys in `gdax-java/src/main/resources/application.yml` - DO NOT COMMIT THEM
+1. supply your API key, secret and passphrase as environment or command line variables. NEVER commit these details to your repo, as you may lose any funds from your account(s). Spring Boot is smart enough to pick up the values for these variables from various places including the application.yml properties file, the system environment, command line variables and more.
+1. 1. For environment variables set: `gdax.key`, `gdax.passphrase`, `gdax.secret`
+1. 1. For command line variables `-Dgdax.key="apiKey" -Dgdax.passphrase="passphrase" -Dgdax.secret="secret"` should work
+1. 1. For command line variables with the gradle command use `-Pgdax.key="apiKey" -Pgdax.passphrase="passphrase" -Pgdax.secret="secret"` should work
 1. open a command line terminal
 1. navigate to the root directory of this project (where `build.gradle` is)
 1. execute `./gradlew bootRun` (Mac/unix). For equivalent Windows commands just remove the `./` from the commands, since there's a gradlew.bat included as well.

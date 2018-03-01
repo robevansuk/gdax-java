@@ -210,12 +210,19 @@ public class OrderBookModel implements TableModel, TableModelListener {
             return getSizeAsBigDecimal(currentSize.add(item.getRemainingSize()));
         } else if (isDoneFilledOrder(item)) {
             return currentSize;
+        } else if (isChangeOrderSize(item)){
+            return getSizeAsBigDecimal(currentSize.subtract(item.getOldSize().subtract(item.getNewSize())));
         } else {
             if (item.getRemainingSize() != null) {
                 return getSizeAsBigDecimal(item.getRemainingSize());
             }
             return getSizeAsBigDecimal(currentSize.add(item.getSize()));
         }
+    }
+
+    private boolean isChangeOrderSize(OrderItem item) {
+        return item.getMessageType()!=null && item.getMessageType().equals(CHANGE)
+                && item.getPrice()!=null;
     }
 
     private boolean isOpenOrder(OrderItem item) {
@@ -253,12 +260,14 @@ public class OrderBookModel implements TableModel, TableModelListener {
     }
 
     private void createNewEntry(OrderItem item, Vector vector, int rowIndex) {
-        if (!isDoneFilledOrder(item)) {
+        // don't create new price entries when closing orders - DONE orderType.
+        if (!isDoneFilledOrder(item) && !isCanceledOrder(item)) {
             data.insertElementAt(vector, rowIndex);
 
             setValueAt(getPriceAsString(item.getPrice()), rowIndex, PRICE_COL);
             setValueAt(getSize(item), rowIndex, SIZE_COL);
             setValueAt(item.getNum().toString(), rowIndex, NUM_ORDERS_COL);
+            validateOrderBookElseRemoveRow(rowIndex);
         }
     }
 
@@ -271,6 +280,7 @@ public class OrderBookModel implements TableModel, TableModelListener {
         setValueAt(currentPrice, rowIndex, PRICE_COL);
         setValueAt(getUpdatedSize(item, currentSize), rowIndex, SIZE_COL);
         setValueAt(getUpdatedQuantity(item, currentQuantity), rowIndex, NUM_ORDERS_COL);
+        validateOrderBookElseRemoveRow(rowIndex);
     }
 
     private boolean isDoneFilledOrder(OrderItem item) {
@@ -285,7 +295,7 @@ public class OrderBookModel implements TableModel, TableModelListener {
 
         int index = Collections.binarySearch(orderIndex, msg, priceComparator);
 
-        if (index < 0 && !isCanceledOrder(msg)) {
+        if (index < 0) {
             // item did not exist so negative index for the insertion point was returned
             // insert item at this point
             index = (index * -1) - 1;
@@ -301,10 +311,6 @@ public class OrderBookModel implements TableModel, TableModelListener {
                     getValueAt(0, PRICE_COL),
                     getValueAt(0, SIZE_COL));
             updateExistingEntry(convertToOrderItem(msg), index);
-        }
-
-        if (index >=0) {
-            validateOrderBookElseRemoveRow(index);
         }
     }
 

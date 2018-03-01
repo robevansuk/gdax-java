@@ -15,6 +15,8 @@ public class OrderItem implements Comparable {
     private BigDecimal price;
     private BigDecimal size;
     private BigDecimal remainingSize;
+    private BigDecimal oldSize;
+    private BigDecimal newSize;
     private String orderId; // a uuid that represents the individual order placed.
     private BigDecimal num;
     private String messageType;
@@ -30,6 +32,8 @@ public class OrderItem implements Comparable {
         this.messageType = message.getType();
         this.side = message.getSide();
         this.reason = message.getReason();
+        this.oldSize = message.getOld_size();
+        this.newSize = message.getNew_size();
     }
 
     @JsonCreator
@@ -45,6 +49,14 @@ public class OrderItem implements Comparable {
         } else {
             num = new BigDecimal(1);
         }
+    }
+
+    public BigDecimal getOldSize() {
+        return oldSize;
+    }
+
+    public BigDecimal getNewSize() {
+        return newSize;
     }
 
     public BigDecimal getPrice() {

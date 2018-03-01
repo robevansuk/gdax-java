@@ -21,20 +21,20 @@ public class OrderBookView extends JPanel {
 
     private String productId;
     private ProductService productService;
-    private LiveOrderBook liveOrderBook;
+    private GdaxLiveOrderBook liveOrderBook;
     private JPanel liveOrderBookPanel;
 
     /**
      * Used by test code
      */
     public OrderBookView() {
-        this.liveOrderBook = new LiveOrderBook();
+        this.liveOrderBook = new GdaxLiveOrderBook();
     }
 
     @Autowired
     public OrderBookView(@Value("${liveorderbook.defaultProduct}") String productId,
                          ProductService productService,
-                         LiveOrderBook liveOrderBook) {
+                         GdaxLiveOrderBook liveOrderBook) {
         super();
         this.productId = productId;
         this.productService = productService;
