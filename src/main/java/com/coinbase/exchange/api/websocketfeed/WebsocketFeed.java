@@ -94,7 +94,7 @@ public class WebsocketFeed {
      */
     @OnClose
     public void onClose(Session userSession, CloseReason reason) {
-        log.info("closing websocket");
+        log.info("closing websocket: {}", reason);
         this.userSession = null;
     }
 
