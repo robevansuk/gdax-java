@@ -240,7 +240,7 @@ public class OrderBookModelTest {
 
         // item should appear at the top of the list since it's a new highest bidder/buy order
         assertThat(testObject.getRowCount(), equalTo(1));
-        assertThat(testObject.getValueAt(0, OrderBookModel.NUM_ORDERS_COL), equalTo("5"));
+        assertThat(testObject.getValueAt(0, NUM_ORDERS_COL), equalTo("5"));
     }
 
     @Test

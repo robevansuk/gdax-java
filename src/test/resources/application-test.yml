@@ -4,9 +4,9 @@
 gdax:
   api:
     baseUrl: "https://api.gdax.com/"
-  key: ""
-  secret: ""
-  passphrase: ""
+  key:
+  secret:
+  passphrase:
   defaultProduct: "BTC-GBP"
 
 websocket:

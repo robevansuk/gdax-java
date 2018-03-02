@@ -1,6 +1,6 @@
 apply plugin: 'java'
 apply plugin: 'application'
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 
 group = 'irufus'
 description = 'Client for the GDAX API'
@@ -22,7 +22,6 @@ repositories {
     maven { url "http://central.maven.org/maven2/"}
     maven { url "http://repo1.maven.org/maven2/" }
     maven { url "https://repo.spring.io/release/"}
-
 }
 
 project.archivesBaseName = 'gdax-java'

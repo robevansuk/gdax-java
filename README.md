@@ -64,7 +64,15 @@ This won't actually do much on its own but the beginnings of a GUI have been dev
 
 For a lib:
 
-1. If you'd rather work purely in java then you can build an executable jar file `./gradlew jar` and you should be able to find the jar in the build directory. This is a WIP.
+1. If you'd rather work purely in java then you can build an executable jar file `./gradlew jar` and you should be able to find the jar in the build directory.
+
+To run the gdax-java codebase from a .jar you'll need to pass all config via directives. The following has been tested and works:
+
+`java -jar -Dgdax.key="yourKey" -Dgdax.secret="youSecret" -Dgdax.passphrase="yourPassphrase" -Dgdax.api.baseUrl="https://api.gdax.com/" -Dgui.enabled=true -Dliveorderbook.defaultProduct="BTC-GBP" -Dliveorderbook.timeout=15 -Dwebsocket.baseUrl="wss://we-feed.gdax.com/" -Dwebsocket.enabled=true build/gdax-java-{VERSION}.jar`
+
+If the config changes from the above you should see a relevant error message in the output informing you.
+
+The other alternative is to include all config in the application.yml, build the jar and export it somewhere.
 
 # Examples
 

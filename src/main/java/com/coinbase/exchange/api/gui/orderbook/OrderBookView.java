@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.swing.*;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.List;
 
@@ -91,7 +92,7 @@ public class OrderBookView extends JPanel {
         return buttonsPanel;
     }
 
-    private JPanel getLiveOrderBookPanel(){
+    private JPanel getLiveOrderBookPanel() {
         liveOrderBookPanel = new JPanel();
         liveOrderBookPanel.setLayout(new BoxLayout(liveOrderBookPanel, X_AXIS));
 
@@ -106,6 +107,14 @@ public class OrderBookView extends JPanel {
     private JPanel getTableInScrollPaneWithLabel(OrderBookModel orderBookModel) {
 
         JTable table = new JTable(orderBookModel);
+
+        GdaxTableCellRenderer cellRenderer = new GdaxTableCellRenderer();
+        for (int i = 0; i < table.getColumnCount(); i++) {
+            TableColumn column = table.getColumnModel().getColumn(i);
+            column.setCellRenderer(cellRenderer);
+        }
+        orderBookModel.setCellRenderer(cellRenderer);
+
         if (orderBookModel.equals(liveOrderBook.getBids())) {
             return getTableInScrollPaneWithLabel(table, "Bids");
         } else {

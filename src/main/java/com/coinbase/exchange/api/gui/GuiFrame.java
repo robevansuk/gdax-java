@@ -37,7 +37,7 @@ public class GuiFrame {
         if (guiEnabled) {
             frame = new JFrame("Gdax Desktop Client");
             frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-            frame.setSize(700, 480);
+            frame.setSize(600, 480);
             frame.setLayout(new BorderLayout());
             frame.add(orderBookView.init(), BorderLayout.CENTER);
             frame.setVisible(true);
