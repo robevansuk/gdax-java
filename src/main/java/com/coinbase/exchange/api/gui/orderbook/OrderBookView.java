@@ -1,6 +1,7 @@
 package com.coinbase.exchange.api.gui.orderbook;
 
 import com.coinbase.exchange.api.entity.Product;
+import com.coinbase.exchange.api.gui.orderbook.ux.GdaxTableCellRenderer;
 import com.coinbase.exchange.api.products.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +21,12 @@ public class OrderBookView extends JPanel {
 
     static final Logger log = LoggerFactory.getLogger(OrderBookView.class);
 
+    List<Product> products;
     private String productId;
     private ProductService productService;
     private GdaxLiveOrderBook liveOrderBook;
     private JPanel liveOrderBookPanel;
+    private JLabel selectedProductLabel;
 
     /**
      * Used by test code
@@ -45,7 +48,6 @@ public class OrderBookView extends JPanel {
 
     public JPanel init() {
         setLayout(new BorderLayout());
-        add(getButtonsPanel(), BorderLayout.NORTH);
         add(reload(), BorderLayout.EAST);
         revalidate();
         repaint();
@@ -59,38 +61,6 @@ public class OrderBookView extends JPanel {
         return liveOrderBookPanel;
     }
 
-    private JPanel getButtonsPanel() {
-        // init to the websocket feeds gone at a time - a bit more lag in terms of booting up an order book
-        // but should mean the network is not clogged up with orders for feeds we're not looking at.
-        List<Product> products = productService.getProducts();
-        JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setLayout(new BoxLayout(buttonsPanel, X_AXIS));
-
-        for (Product prod : products) {
-            JButton button = new JButton(prod.getId());
-            button.addActionListener(event -> {
-                if (event.getActionCommand().equals(button.getText())) {
-                    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
-                        @Override
-                        protected Void doInBackground() {
-                            productId = event.getActionCommand();
-                            reload();
-                            return null;
-                        }
-
-                        @Override
-                        protected void done() {
-                            revalidate();
-                            repaint();
-                        }
-                    };
-                    worker.execute();
-                }
-            });
-            buttonsPanel.add(button);
-        }
-        return buttonsPanel;
-    }
 
     private JPanel getLiveOrderBookPanel() {
         liveOrderBookPanel = new JPanel();
@@ -146,5 +116,9 @@ public class OrderBookView extends JPanel {
             table.getColumnModel().getColumn(i).setMaxWidth(widths[i] * 2);
             table.getColumnModel().getColumn(i).setPreferredWidth(widths[i]);
         }
+    }
+
+    public GdaxLiveOrderBook getLiveOrderBook() {
+        return liveOrderBook;
     }
 }

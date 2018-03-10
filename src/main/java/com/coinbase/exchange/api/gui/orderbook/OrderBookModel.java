@@ -1,5 +1,6 @@
 package com.coinbase.exchange.api.gui.orderbook;
 
+import com.coinbase.exchange.api.gui.orderbook.ux.GdaxTableCellRenderer;
 import com.coinbase.exchange.api.marketdata.OrderItem;
 import com.coinbase.exchange.api.websocketfeed.message.OrderBookMessage;
 import org.slf4j.Logger;

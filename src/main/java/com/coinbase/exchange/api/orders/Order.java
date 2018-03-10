@@ -18,6 +18,7 @@ public class Order {
     String filled_size;
     String executed_value;
     String status;
+    private String funds;
 
     public Order() {}
 
@@ -182,4 +183,11 @@ public class Order {
         return orderString;
     }
 
+    public void setFunds(String funds) {
+        this.funds = funds;
+    }
+
+    public String getFunds() {
+        return funds;
+    }
 }

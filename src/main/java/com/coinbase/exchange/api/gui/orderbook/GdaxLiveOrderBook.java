@@ -235,4 +235,8 @@ public class GdaxLiveOrderBook {
     public long getTimeout() {
         return timeout;
     }
+
+    public String getSelectedProductId() {
+        return productId;
+    }
 }
