@@ -1,6 +1,5 @@
 package com.coinbase.exchange.api.gui;
 
-
 import com.coinbase.exchange.api.gui.orderbook.OrderBookView;
 import com.coinbase.exchange.api.gui.orderbook.menubar.MainMenu;
 import com.coinbase.exchange.api.gui.orderbook.orders.MakeOrdersPanel;
@@ -47,7 +46,7 @@ public class GuiFrame {
         if (guiEnabled) {
             frame = new JFrame("Gdax Desktop Client");
             frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-            frame.setSize(900, 480);
+            frame.setSize(1200, 480);
             frame.setLayout(new BorderLayout());
             frame.add(orderBookView.init(), BorderLayout.EAST);
             frame.add(makeOrdersPanel.init(), BorderLayout.WEST);
