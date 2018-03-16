@@ -6,7 +6,9 @@ import com.coinbase.exchange.api.gui.orderbook.GdaxLiveOrderBook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;

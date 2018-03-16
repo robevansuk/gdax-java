@@ -2,7 +2,8 @@ package com.coinbase.exchange.api.gui.orderbook.ux;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;

@@ -4,7 +4,9 @@ import com.coinbase.exchange.api.entity.Product;
 import com.coinbase.exchange.api.gui.orderbook.GdaxLiveOrderBook;
 import com.coinbase.exchange.api.products.ProductService;
 
-import javax.swing.*;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import java.awt.event.ActionEvent;
 import java.util.List;
 

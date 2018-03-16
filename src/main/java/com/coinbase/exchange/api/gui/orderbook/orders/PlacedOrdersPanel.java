@@ -3,8 +3,9 @@ package com.coinbase.exchange.api.gui.orderbook.orders;
 import com.coinbase.exchange.api.orders.Order;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 import java.util.Vector;
 
 @Component
