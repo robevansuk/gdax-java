@@ -3,7 +3,8 @@ package com.coinbase.exchange.api.gui.orderbook.info;
 import com.coinbase.exchange.api.gui.orderbook.GdaxLiveOrderBook;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 @Component
 public class StatsPanel {
