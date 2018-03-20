@@ -24,14 +24,14 @@ import static java.math.BigDecimal.ROUND_HALF_UP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
-public class LiveOrderBookTest {
+public class GdaxLiveOrderBookTest {
 
-    private static final Logger log = LoggerFactory.getLogger(LiveOrderBook.class);
+    private static final Logger log = LoggerFactory.getLogger(GdaxLiveOrderBook.class);
 
     private static final long INITIAL_MAX_SEQUENCE_ID = 123456L;
 
     MarketData marketData;
-    LiveOrderBook testObject;
+    GdaxLiveOrderBook testObject;
 
     @Before
     public void setup(){
@@ -39,7 +39,7 @@ public class LiveOrderBookTest {
         List<OrderItem> asks = getOrderItems("/testdata/testAsks.csv");
 
         marketData = new MarketData(INITIAL_MAX_SEQUENCE_ID, bids, asks);
-        testObject = new LiveOrderBook();
+        testObject = new GdaxLiveOrderBook();
         testObject.initBidsAndAsksAndMaxSequenceId(marketData);
         testObject.setReady(true);
     }
@@ -411,7 +411,8 @@ public class LiveOrderBookTest {
     @Test
     public void shouldAddNewPriceEntryForOpenBuyOrdersAtNewPriceEntryPositions() {
         OrderBookMessage openBuy = getOrderFromFile("/testdata/openBuy_001.json");
-        int index = getPriceEntryIndex(testObject.getBids(), new BigDecimal(9872.10));
+        BigDecimal lookupPrice = new BigDecimal(9872.10).setScale(8, ROUND_HALF_UP);
+        int index = getPriceEntryIndex(testObject.getBids(), lookupPrice);
         assertThat(index).isEqualTo(-1);
 
         // note: sequence ID must be in sequence
@@ -419,7 +420,7 @@ public class LiveOrderBookTest {
         testObject.handleMessages(openBuy); // price: 9872.10, remaining_size: 0.88000000
 
         // rounding necessary here since the big decimal doesn't compare how we'd expect otherwise.
-        index = getPriceEntryIndex(testObject.getBids(), new BigDecimal(9872.10).setScale(8, ROUND_HALF_UP));
+        index = getPriceEntryIndex(testObject.getBids(), lookupPrice);
         assertThat(index).isEqualTo(4);
         assertThat(testObject.getBids().getValueAt(index, SIZE_COL)).isEqualTo("0.88000000");
     }
@@ -535,6 +536,29 @@ public class LiveOrderBookTest {
         // rounding necessary here since the big decimal doesn't compare how we'd expect otherwise.
         index = getPriceEntryIndex(testObject.getAsks(), priceEntry);
         assertThat(index).isEqualTo(-1);
+    }
+
+
+    /**
+     * When price is specified on a change order the change is for a market order so we should update
+     * the size for what should be an existing price entry.
+     */
+    @Test
+    public void shouldHandleChangeMessagesIfPriceIsSpecified() {
+        OrderBookMessage changeOrder_updatePrice = getOrderFromFile("/testdata/changeBuy_001.json");
+        BigDecimal priceEntry = new BigDecimal(9875.10).setScale(8, ROUND_HALF_UP);
+        int index = getPriceEntryIndex(testObject.getBids(),priceEntry);
+        assertThat(index).isEqualTo(1);
+
+        // note: sequence ID must be in sequence
+        // remaining size - the outstanding amount of the order to cancel - but do not create new entry if
+        // price point does not exist.
+        testObject.handleMessages(changeOrder_updatePrice); // price: 9875.10, remaining_size: 5.23512
+
+        // rounding necessary here since the big decimal doesn't compare how we'd expect otherwise.
+        index = getPriceEntryIndex(testObject.getBids(), priceEntry);
+        assertThat(index).isEqualTo(1);
+        assertThat(testObject.getBids().getValueAt(index, SIZE_COL)).isEqualTo("5.23512000");
     }
 
     private OrderBookMessage sellMessage() {

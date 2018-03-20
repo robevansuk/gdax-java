@@ -24,6 +24,10 @@ public class GdaxConstants {
     public static final String LIMIT_ORDER_TYPE = "limit";
     public static final String BTC_GBP_PRODUCT = "BTC-GBP";
     public static final String RECEIVED = "received";
+    public static final String CHANGE = "change";
+    public static final String STOP = "STOP";
+    public static final String MARKET = "Market";
+    public static final String LIMIT = "Limit";
 
     public static Mac SHARED_MAC;
 

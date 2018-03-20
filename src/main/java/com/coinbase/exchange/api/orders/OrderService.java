@@ -2,7 +2,6 @@ package com.coinbase.exchange.api.orders;
 
 import com.coinbase.exchange.api.entity.Fill;
 import com.coinbase.exchange.api.entity.Hold;
-import com.coinbase.exchange.api.entity.NewOrderSingle;
 import com.coinbase.exchange.api.exchange.GdaxExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
@@ -39,7 +38,7 @@ public class OrderService {
         return exchange.get(ORDERS_ENDPOINT + "/" + orderId,new ParameterizedTypeReference<Order>(){});
     }
 
-    public Order createOrder(NewOrderSingle order) {
+    public Order createOrder(Order order) {
         return exchange.post(ORDERS_ENDPOINT, new ParameterizedTypeReference<Order>(){}, order);
     }
 

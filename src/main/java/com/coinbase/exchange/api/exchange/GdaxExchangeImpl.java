@@ -19,7 +19,6 @@ import java.util.List;
 
 import static org.springframework.http.HttpMethod.GET;
 
-
 /**
  * Created by irufus on 2/25/15.
  */

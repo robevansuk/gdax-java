@@ -16,9 +16,9 @@ import java.util.Map;
 import static com.coinbase.exchange.api.constants.GdaxConstants.*;
 
 @Component
-public class LiveOrderBook {
+public class GdaxLiveOrderBook {
 
-    public static final Logger log = LoggerFactory.getLogger(LiveOrderBook.class);
+    public static final Logger log = LoggerFactory.getLogger(GdaxLiveOrderBook.class);
 
     private MarketDataService marketDataService;
     private WebsocketFeed websocketFeed;
@@ -35,7 +35,7 @@ public class LiveOrderBook {
 
     private Map<Long, OrderBookMessage> queuedMessages;
 
-    public LiveOrderBook() {
+    public GdaxLiveOrderBook() {
         this.productId = "BTC-GBP";
         this.timeout = 10;
         queuedMessages = new HashMap<>();
@@ -46,10 +46,10 @@ public class LiveOrderBook {
     }
 
     @Autowired
-    public LiveOrderBook(@Value("${liveorderbook.timeout}") int timeout,
-                         @Value("${liveorderbook.defaultProduct}") String productId,
-                         MarketDataService marketDataService,
-                         WebsocketFeed websocketFeed) {
+    public GdaxLiveOrderBook(@Value("${liveorderbook.timeout}") int timeout,
+                             @Value("${liveorderbook.defaultProduct}") String productId,
+                             MarketDataService marketDataService,
+                             WebsocketFeed websocketFeed) {
         this.timeout = timeout;
         this.productId = productId;
         this.isReady = false;
@@ -60,7 +60,7 @@ public class LiveOrderBook {
 
         this.marketDataService = marketDataService;
         this.websocketFeed = websocketFeed;
-        log.info("LiveOrderBook almost ready.");
+        log.info("GdaxLiveOrderBook almost ready.");
     }
 
     public void loadLiveOrderBookModel(String productId) {
@@ -71,7 +71,7 @@ public class LiveOrderBook {
         websocketFeed.subscribe(productId, this);// *** THIS MUST HAPPEN BEFORE INITING THE OB OR MESSAGES WILL LIKELY BE MISSING
         initBidsAndAsksAndMaxSequenceId(marketDataService.getMarketDataOrderBook(productId, FULL_ORDER_BOOK));
         isReady = true;
-        log.info("LiveOrderBook ready!");
+        log.info("GdaxLiveOrderBook ready!");
     }
 
     public void initBidsAndAsksAndMaxSequenceId(MarketData data) {
@@ -114,8 +114,8 @@ public class LiveOrderBook {
             loadLiveOrderBookModel(productId);
 
         }
-        if(message.getType().equals("change") || message.getType().equals("activate")) {
-            log.error("Change message received");
+        if(message.getType().equals("activate")) {
+            log.error("activate message received {}", message.getSequence());
         }
         if (isReady) {
             long sequenceId = message.getSequence();
@@ -157,7 +157,13 @@ public class LiveOrderBook {
     }
 
     private boolean isMessageTypeWeCareAbout(OrderBookMessage message) {
-        return (isOpenOrder(message) || isCancelledOrder(message) || isMatchOrder(message) || isDoneFilledOrder(message));
+        return (isOpenOrder(message) || isCancelledOrder(message) || isMatchOrder(message) || isDoneFilledOrder(message) || isChangeWithPrice(message));
+    }
+
+    private boolean isChangeWithPrice(OrderBookMessage message) {
+
+        return message.getType() != null && message.getType().equals(CHANGE)
+                && message.getPrice() != null;
     }
 
     private boolean isDoneFilledOrder(OrderBookMessage message) {
@@ -228,5 +234,9 @@ public class LiveOrderBook {
 
     public long getTimeout() {
         return timeout;
+    }
+
+    public String getSelectedProductId() {
+        return productId;
     }
 }

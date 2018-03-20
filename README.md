@@ -50,7 +50,10 @@ Please see CONTRIBUTE.md if your interested in getting involved.
 
 To build and run the application you can use the gradle script - this requires no installation as the "gradle wrapper" is included as part of the source code. All you need to do is:
 
-1. supply your API keys in `gdax-java/src/main/resources/application.yml` - DO NOT COMMIT THEM
+1. supply your API key, secret and passphrase as environment or command line variables. NEVER commit these details to your repo, as you may lose any funds from your account(s). Spring Boot is smart enough to pick up the values for these variables from various places including the application.yml properties file, the system environment, command line variables and more.
+1. 1. For environment variables set: `gdax.key`, `gdax.passphrase`, `gdax.secret`
+1. 1. For command line variables `-Dgdax.key="apiKey" -Dgdax.passphrase="passphrase" -Dgdax.secret="secret"` should work
+1. 1. For command line variables with the gradle command use `-Pgdax.key="apiKey" -Pgdax.passphrase="passphrase" -Pgdax.secret="secret"` should work
 1. open a command line terminal
 1. navigate to the root directory of this project (where `build.gradle` is)
 1. execute `./gradlew bootRun` (Mac/unix). For equivalent Windows commands just remove the `./` from the commands, since there's a gradlew.bat included as well.
@@ -61,7 +64,15 @@ This won't actually do much on its own but the beginnings of a GUI have been dev
 
 For a lib:
 
-1. If you'd rather work purely in java then you can build an executable jar file `./gradlew jar` and you should be able to find the jar in the build directory. This is a WIP.
+1. If you'd rather work purely in java then you can build an executable jar file `./gradlew jar` and you should be able to find the jar in the build directory.
+
+To run the gdax-java codebase from a .jar you'll need to pass all config via directives. The following has been tested and works:
+
+`java -jar -Dgdax.key="yourKey" -Dgdax.secret="youSecret" -Dgdax.passphrase="yourPassphrase" -Dgdax.api.baseUrl="https://api.gdax.com/" -Dgui.enabled=true -Dliveorderbook.defaultProduct="BTC-GBP" -Dliveorderbook.timeout=15 -Dwebsocket.baseUrl="wss://we-feed.gdax.com/" -Dwebsocket.enabled=true build/gdax-java-{VERSION}.jar`
+
+If the config changes from the above you should see a relevant error message in the output informing you.
+
+The other alternative is to include all config in the application.yml, build the jar and export it somewhere.
 
 # Examples
 

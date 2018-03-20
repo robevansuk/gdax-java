@@ -18,6 +18,8 @@ public class Order {
     String filled_size;
     String executed_value;
     String status;
+    boolean settled;
+    private String funds;
 
     public Order() {}
 
@@ -38,8 +40,6 @@ public class Order {
         this.status = status;
         this.settled = settled;
     }
-
-    Boolean settled;
 
     public Order(OrderBuilder builder) {
         this.id = builder.getId();
@@ -166,15 +166,23 @@ public class Order {
         this.status = status;
     }
 
-    public Boolean getSettled() {
+    public boolean getSettled() {
         return settled;
     }
 
-    public void setSettled(Boolean settled) {
+    public void setSettled(boolean settled) {
         this.settled = settled;
     }
 
     public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(getSide() + ", ")
+                .append(getProduct_id() + ", ")
+                .append(getPrice() + ", ")
+                .append(getSize() + ", ")
+                .append(getId() + ", ")
+                .append(getCreated_at() + ", ")
+                .append(getSettled());
         String orderString = getSide();
         orderString += ": " + getProduct_id();
         orderString += ": " + getPrice();
@@ -182,4 +190,11 @@ public class Order {
         return orderString;
     }
 
+    public void setFunds(String funds) {
+        this.funds = funds;
+    }
+
+    public String getFunds() {
+        return funds;
+    }
 }

@@ -1,5 +1,6 @@
 package com.coinbase.exchange.api.gui.orderbook;
 
+import com.coinbase.exchange.api.gui.orderbook.ux.GdaxTableCellRenderer;
 import com.coinbase.exchange.api.marketdata.OrderItem;
 import com.coinbase.exchange.api.websocketfeed.message.OrderBookMessage;
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ import java.util.List;
 import java.util.Vector;
 
 import static com.coinbase.exchange.api.constants.GdaxConstants.*;
+import static java.math.BigDecimal.ROUND_HALF_UP;
+import static java.math.BigDecimal.ZERO;
 import static java.util.stream.Collectors.toList;
 
 public class OrderBookModel implements TableModel, TableModelListener {
@@ -28,11 +31,8 @@ public class OrderBookModel implements TableModel, TableModelListener {
             "#orders"
     };
 
-    public static final int PRICE_COL = 0;
-    public static final int SIZE_COL = 1;
-    public static final int NUM_ORDERS_COL = 2;
-
     private Vector<Vector> data;
+    private GdaxTableCellRenderer cellRenderer;
 
     public OrderBookModel() {
         this.data = new Vector<>();
@@ -210,6 +210,8 @@ public class OrderBookModel implements TableModel, TableModelListener {
             return getSizeAsBigDecimal(currentSize.add(item.getRemainingSize()));
         } else if (isDoneFilledOrder(item)) {
             return currentSize;
+        } else if (isChangeOrderSize(item)) {
+            return getSizeAsBigDecimal(currentSize.subtract(item.getOldSize().subtract(item.getNewSize())));
         } else {
             if (item.getRemainingSize() != null) {
                 return getSizeAsBigDecimal(item.getRemainingSize());
@@ -218,12 +220,17 @@ public class OrderBookModel implements TableModel, TableModelListener {
         }
     }
 
+    private boolean isChangeOrderSize(OrderItem item) {
+        return item.getMessageType() != null && item.getMessageType().equals(CHANGE)
+                && item.getPrice() != null;
+    }
+
     private boolean isOpenOrder(OrderItem item) {
         return item.getMessageType() != null && item.getMessageType().equals(OPEN);
     }
 
     private BigDecimal getSizeAsBigDecimal(BigDecimal size) {
-        return size.setScale(SIZE_DECIMAL_PLACES, BigDecimal.ROUND_HALF_UP);
+        return size.setScale(SIZE_DECIMAL_PLACES, ROUND_HALF_UP);
     }
 
     private Integer getUpdatedQuantity(OrderItem item, int currentQuantity) {
@@ -247,19 +254,24 @@ public class OrderBookModel implements TableModel, TableModelListener {
                 && item.getReason() != null && item.getReason().equals(CANCELED);
     }
 
-    private boolean isCanceledOrder(OrderBookMessage item) {
-        return item.getType() != null && item.getType().equals(DONE)
-                && item.getReason() != null && item.getReason().equals(CANCELED);
-    }
-
     private void createNewEntry(OrderItem item, Vector vector, int rowIndex) {
-        if (!isDoneFilledOrder(item)) {
+        // don't create new price entries for any type of Done order whose price doesn't already exist in the table
+        if (!isDoneOrder(item)) {
             data.insertElementAt(vector, rowIndex);
 
             setValueAt(getPriceAsString(item.getPrice()), rowIndex, PRICE_COL);
             setValueAt(getSize(item), rowIndex, SIZE_COL);
             setValueAt(item.getNum().toString(), rowIndex, NUM_ORDERS_COL);
+            if (!shouldRemoveRow(rowIndex)) {
+                if (cellRenderer!=null) {
+                    cellRenderer.flashRow(rowIndex, System.currentTimeMillis());
+                }
+            }
         }
+    }
+
+    private boolean isDoneOrder(OrderItem item) {
+        return item.getMessageType() != null && item.getMessageType().equals(DONE);
     }
 
     private void updateExistingEntry(OrderItem item, int rowIndex) {
@@ -271,6 +283,11 @@ public class OrderBookModel implements TableModel, TableModelListener {
         setValueAt(currentPrice, rowIndex, PRICE_COL);
         setValueAt(getUpdatedSize(item, currentSize), rowIndex, SIZE_COL);
         setValueAt(getUpdatedQuantity(item, currentQuantity), rowIndex, NUM_ORDERS_COL);
+        if(!shouldRemoveRow(rowIndex)) {
+            if (cellRenderer!=null) {
+                cellRenderer.flashRow(rowIndex, System.currentTimeMillis());
+            }
+        }
     }
 
     private boolean isDoneFilledOrder(OrderItem item) {
@@ -285,7 +302,7 @@ public class OrderBookModel implements TableModel, TableModelListener {
 
         int index = Collections.binarySearch(orderIndex, msg, priceComparator);
 
-        if (index < 0 && !isCanceledOrder(msg)) {
+        if (index < 0) {
             // item did not exist so negative index for the insertion point was returned
             // insert item at this point
             index = (index * -1) - 1;
@@ -302,15 +319,6 @@ public class OrderBookModel implements TableModel, TableModelListener {
                     getValueAt(0, SIZE_COL));
             updateExistingEntry(convertToOrderItem(msg), index);
         }
-
-        if (index >=0) {
-            validateOrderBookElseRemoveRow(index);
-        }
-    }
-
-    private boolean isDoneFilledOrder(OrderBookMessage message) {
-        return message.getType() != null && message.getType().equals(DONE)
-                && message.getReason() != null && message.getReason().equals(FILLED);
     }
 
     private Vector createNewVector() {
@@ -327,7 +335,7 @@ public class OrderBookModel implements TableModel, TableModelListener {
     }
 
     public BigDecimal getOrderPrice(OrderBookMessage msg) {
-        return msg.getPrice().setScale(PRICE_DECIMAL_PLACES, BigDecimal.ROUND_HALF_UP);
+        return msg.getPrice().setScale(PRICE_DECIMAL_PLACES, ROUND_HALF_UP);
     }
 
     private Comparator<OrderBookMessage> orderBookMessagePriceComparator() {
@@ -347,19 +355,6 @@ public class OrderBookModel implements TableModel, TableModelListener {
         return o1.getSide() != null && o1.getSide().equals(BUY);
     }
 
-    private boolean isMatchOrderType(OrderBookMessage o1) {
-        return o1.getType() != null && o1.getType().equals(MATCH);
-    }
-
-    public static Comparator<OrderBookMessage> orderBookMessageSequenceComparator() {
-        return new Comparator<OrderBookMessage>() {
-            @Override
-            public int compare(OrderBookMessage o1, OrderBookMessage o2) {
-                return o1.getSequence().compareTo(o2.getSequence()); // reverse order by price
-            }
-        };
-    }
-
     private List<OrderBookMessage> getListOfAllRelevantOrders(OrderBookMessage msg) {
         return data.stream()
                 .map(order -> {
@@ -372,34 +367,41 @@ public class OrderBookModel implements TableModel, TableModelListener {
                 .collect(toList());
     }
 
-    private void validateOrderBookElseRemoveRow(int rowUpdated) {
+    private boolean shouldRemoveRow(int rowUpdated) {
         if (getValueAt(rowUpdated, PRICE_COL) == null) {
             removeRow(rowUpdated);
+            return true;
         } else {
             BigDecimal currentSize = getPriceAsBigDecimal((String) getValueAt(rowUpdated, SIZE_COL));
             if (isZeroOrLess(currentSize)) {
                 removeRow(rowUpdated);
+                return true;
             }
         }
+        return false;
     }
 
     private boolean isZeroOrLess(BigDecimal value) {
-        return value.compareTo(BigDecimal.ZERO) <= 0;
+        return value.compareTo(ZERO) <= 0;
     }
 
     private BigDecimal getPriceAsBigDecimal(String priceString) {
-        return new BigDecimal(priceString).setScale(PRICE_DECIMAL_PLACES, BigDecimal.ROUND_HALF_UP);
+        return new BigDecimal(priceString).setScale(PRICE_DECIMAL_PLACES, ROUND_HALF_UP);
     }
 
     private BigDecimal getSizeAsBigDecimal(String sizeString) {
-        return new BigDecimal(sizeString).setScale(SIZE_DECIMAL_PLACES, BigDecimal.ROUND_HALF_UP);
+        return new BigDecimal(sizeString).setScale(SIZE_DECIMAL_PLACES, ROUND_HALF_UP);
     }
 
     private String getPriceAsString(BigDecimal priceValue) {
-        return priceValue.setScale(PRICE_DECIMAL_PLACES, BigDecimal.ROUND_HALF_UP).toString();
+        return priceValue.setScale(PRICE_DECIMAL_PLACES, ROUND_HALF_UP).toString();
     }
 
     public void clear() {
         data.clear();
+    }
+
+    public void setCellRenderer(GdaxTableCellRenderer cellRenderer) {
+        this.cellRenderer = cellRenderer;
     }
 }
