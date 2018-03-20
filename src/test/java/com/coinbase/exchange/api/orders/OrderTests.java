@@ -74,7 +74,7 @@ public class OrderTests extends BaseTest {
         BigDecimal price = getAskPrice(marketData).setScale(8, BigDecimal.ROUND_HALF_UP);
         BigDecimal size = new BigDecimal("0.01").setScale(8, BigDecimal.ROUND_HALF_UP);
 
-        NewLimitOrderSingle limitOrder = getNewLimitOrderSingle(productId, price, size);
+        Order limitOrder = getLimitOrder(productId, price, size);
 
         Order order = orderService.createOrder(limitOrder);
 
@@ -111,8 +111,8 @@ public class OrderTests extends BaseTest {
         return marketDataService.getMarketDataOrderBook(product, "1");
     }
 
-    private NewLimitOrderSingle getNewLimitOrderSingle(String productId, BigDecimal price, BigDecimal size) {
-        NewLimitOrderSingle limitOrder = new NewLimitOrderSingle();
+    private Order getLimitOrder(String productId, BigDecimal price, BigDecimal size) {
+        Order limitOrder = new Order();
         limitOrder.setProduct_id(productId);
         if (productId.contains("-BTC")) {
             limitOrder.setSide("sell");
@@ -120,8 +120,8 @@ public class OrderTests extends BaseTest {
             limitOrder.setSide("buy");
         }
         limitOrder.setType("limit");
-        limitOrder.setPrice(price);
-        limitOrder.setSize(size);
+        limitOrder.setPrice(price.toString());
+        limitOrder.setSize(size.toString());
         return limitOrder;
     }
 
