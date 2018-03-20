@@ -1,8 +1,10 @@
 package com.coinbase.exchange.api.gui;
 
 import com.coinbase.exchange.api.gui.orderbook.OrderBookView;
+import com.coinbase.exchange.api.gui.orderbook.info.HistoricalChart;
 import com.coinbase.exchange.api.gui.orderbook.menubar.MainMenu;
 import com.coinbase.exchange.api.gui.orderbook.orders.MakeOrdersPanel;
+import com.coinbase.exchange.api.gui.orderbook.orders.PlacedOrdersPanel;
 import com.coinbase.exchange.api.products.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,8 @@ public class GuiFrame {
     private OrderBookView orderBookView;
     private MakeOrdersPanel makeOrdersPanel;
     private ProductService productService;
+    private PlacedOrdersPanel placedOrdersPanel;
+    private HistoricalChart historicalChart;
     private Boolean guiEnabled;
 
     private JFrame frame;
@@ -35,11 +39,16 @@ public class GuiFrame {
     public GuiFrame(@Value("${gui.enabled}") boolean guiEnabled,
                     OrderBookView orderBookView,
                     MakeOrdersPanel makeOrdersPanel,
-                    ProductService productService) {
+                    ProductService productService,
+                    PlacedOrdersPanel placedOrdersPanel,
+                    HistoricalChart historicalChart
+    ) {
         this.guiEnabled = guiEnabled;
         this.orderBookView = orderBookView;
         this.makeOrdersPanel = makeOrdersPanel;
         this.productService = productService;
+        this.placedOrdersPanel = placedOrdersPanel;
+        this.historicalChart = historicalChart;
     }
 
     public void init() {
@@ -50,6 +59,8 @@ public class GuiFrame {
             frame.setLayout(new BorderLayout());
             frame.add(orderBookView.init(), BorderLayout.EAST);
             frame.add(makeOrdersPanel.init(), BorderLayout.WEST);
+            frame.add(placedOrdersPanel.init(), BorderLayout.SOUTH);
+            frame.add(historicalChart.init(), BorderLayout.CENTER);
             frame.setJMenuBar(new MainMenu(productService, orderBookView.getLiveOrderBook()));
             frame.setVisible(true);
             log.info("Frame initiation complete!");

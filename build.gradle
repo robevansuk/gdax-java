@@ -37,6 +37,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web:1.5.4.RELEASE'
     compile 'org.springframework:spring-context:4.3.4.RELEASE'
     compile 'joda-time:joda-time:2.9.7'
+    compile 'org.jfree:jfreechart:1.5.0'
 
     testCompile 'org.springframework:spring-test:4.3.5.RELEASE'
     testCompile 'org.springframework.boot:spring-boot-test:1.5.4.RELEASE'
