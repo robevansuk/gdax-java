@@ -11,11 +11,11 @@ gdax:
 
 websocket:
   baseUrl: "wss://ws-feed.gdax.com/"
-  enabled: true
+  enabled: false
 
 liveorderbook:
   defaultProduct: "BTC-GBP"
   timeout: 15
 
 gui:
-  enabled: true
+  enabled: false

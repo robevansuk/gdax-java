@@ -8,7 +8,7 @@ gdax:
 
 websocket:
   baseUrl: "wss://ws-feed.gdax.com/"
-  enabled: true
+  enabled: false
 
 liveorderbook:
   defaultProduct: "BTC-GBP"
