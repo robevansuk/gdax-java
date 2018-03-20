@@ -26,7 +26,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -77,7 +76,6 @@ public class HistoricalChart extends JPanel {
 
 
     private Timeline getTimeline(String selectedProductId, List<List<BigDecimal>> historicalRates) {
-
         DateAxis dateAxis = new DateAxis(selectedProductId);
         Long firstTimeStamp = Long.parseLong(historicalRates.get(0).get(0).toString());
         Long lastTimeStamp = Long.parseLong(historicalRates.get(historicalRates.size() - 1).get(0).toString());
@@ -86,7 +84,6 @@ public class HistoricalChart extends JPanel {
         dateAxis.setMaximumDate(new Date(lastTimeStamp));
 
         return dateAxis.getTimeline();
-
     }
 
     private TimeSeries getTimeSeries(String selectedProductId, List<List<BigDecimal>> historicalRates) {
@@ -96,7 +93,6 @@ public class HistoricalChart extends JPanel {
 
         for (List<BigDecimal> historicRate : historicalRates) {
             Long endTime = Long.parseLong(historicRate.get(0).toString());
-            Long startTime = endTime - interval;
             RegularTimePeriod timePeriod = RegularTimePeriod.createInstance(Minute.class, new Date(endTime), TimeZone.getDefault(), Locale.ENGLISH);
             double one = 1; // TODO what is this param?
             timeSeries.add(new TimeSeriesDataItem(timePeriod, one));
@@ -139,18 +135,6 @@ public class HistoricalChart extends JPanel {
         return data;
     }
 
-    private void populateTimeSeries(TimeSeries ts, List<List<BigDecimal>> historicalRates) {
-        for (List<BigDecimal> historicRate : historicalRates) {
-            ZonedDateTime time = ZonedDateTime.parse(getEndTime(historicRate));
-            Double openPrice = getOpenPrice(historicRate);
-            Double highPrice = getHighPrice(historicRate);
-
-            Double lowPrice = getLowPrice(historicRate);
-            Double closePrice = getClosePrice(historicRate);
-            Double volume = getVolume(historicRate);
-        }
-    }
-
     private Double getVolume(List<BigDecimal> historicalRate) {
         String volume = historicalRate.get(5).toString();
         return Double.parseDouble(volume);
@@ -184,11 +168,5 @@ public class HistoricalChart extends JPanel {
     private Long getTime(List<BigDecimal> historicalRate) {
         Long finalTime = Long.parseLong(historicalRate.get(0).toString());
         return finalTime;
-    }
-
-    private Long getTimePeriod(List<List<BigDecimal>> historicalRates) {
-        BigDecimal startTime = historicalRates.get(0).get(0);
-        BigDecimal endTime = historicalRates.get(1).get(0);
-        return Long.parseLong(endTime.subtract(startTime).toString());
     }
 }
