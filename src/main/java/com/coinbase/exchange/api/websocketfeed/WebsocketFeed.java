@@ -119,7 +119,9 @@ public class WebsocketFeed {
     }
 
     public void sendMessage(String message) {
-        this.userSession.getAsyncRemote().sendText(message);
+        if(isEnabled) {
+            this.userSession.getAsyncRemote().sendText(message);
+        }
     }
 
     public void subscribe(String productId, GdaxLiveOrderBook liveOrderBook) {

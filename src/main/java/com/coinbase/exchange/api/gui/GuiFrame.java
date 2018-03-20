@@ -4,7 +4,7 @@ import com.coinbase.exchange.api.gui.orderbook.OrderBookView;
 import com.coinbase.exchange.api.gui.orderbook.info.HistoricalChart;
 import com.coinbase.exchange.api.gui.orderbook.menubar.MainMenu;
 import com.coinbase.exchange.api.gui.orderbook.orders.MakeOrdersPanel;
-import com.coinbase.exchange.api.gui.orderbook.orders.PlacedOrdersPanel;
+import com.coinbase.exchange.api.gui.orderbook.orders.ActiveOrdersPanel;
 import com.coinbase.exchange.api.products.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,7 @@ public class GuiFrame {
     private OrderBookView orderBookView;
     private MakeOrdersPanel makeOrdersPanel;
     private ProductService productService;
-    private PlacedOrdersPanel placedOrdersPanel;
+    private ActiveOrdersPanel activeOrdersPanel;
     private HistoricalChart historicalChart;
     private Boolean guiEnabled;
 
@@ -40,14 +40,14 @@ public class GuiFrame {
                     OrderBookView orderBookView,
                     MakeOrdersPanel makeOrdersPanel,
                     ProductService productService,
-                    PlacedOrdersPanel placedOrdersPanel,
+                    ActiveOrdersPanel activeOrdersPanel,
                     HistoricalChart historicalChart
     ) {
         this.guiEnabled = guiEnabled;
         this.orderBookView = orderBookView;
         this.makeOrdersPanel = makeOrdersPanel;
         this.productService = productService;
-        this.placedOrdersPanel = placedOrdersPanel;
+        this.activeOrdersPanel = activeOrdersPanel;
         this.historicalChart = historicalChart;
     }
 
@@ -59,7 +59,7 @@ public class GuiFrame {
             frame.setLayout(new BorderLayout());
             frame.add(orderBookView.init(), BorderLayout.EAST);
             frame.add(makeOrdersPanel.init(), BorderLayout.WEST);
-            frame.add(placedOrdersPanel.init(), BorderLayout.SOUTH);
+            frame.add(activeOrdersPanel.init(), BorderLayout.SOUTH);
             frame.add(historicalChart.init(), BorderLayout.CENTER);
             frame.setJMenuBar(new MainMenu(productService, orderBookView.getLiveOrderBook()));
             frame.setVisible(true);

@@ -13,14 +13,14 @@ import java.util.List;
 import java.util.Vector;
 
 @Component
-public class PlacedOrdersPanel extends JPanel {
+public class ActiveOrdersPanel extends JPanel {
 
     private JList placedOrdersList;
     private Vector<Order> dataModel;
     private OrderService orderService;
 
     @Autowired
-    public PlacedOrdersPanel(OrderService orderService) {
+    public ActiveOrdersPanel(OrderService orderService) {
         super();
         this.orderService = orderService;
         this.dataModel = new Vector<>();

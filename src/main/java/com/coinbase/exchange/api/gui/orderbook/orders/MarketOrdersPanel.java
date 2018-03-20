@@ -32,7 +32,7 @@ public class MarketOrdersPanel extends JPanel {
     private JTextField funds;
     private OrderService orderService;
     private BalancePanel balancePanel;
-    private PlacedOrdersPanel placeOrdersPanel;
+    private ActiveOrdersPanel placeOrdersPanel;
     private JTextField amountOfCurrency;
     private JButton buyButton;
     private JButton sellButton;
@@ -43,7 +43,7 @@ public class MarketOrdersPanel extends JPanel {
     public MarketOrdersPanel(GdaxLiveOrderBook liveOrderBook,
                              OrderService orderService,
                              BalancePanel balancePanel,
-                             PlacedOrdersPanel placeOrdersPanel){
+                             ActiveOrdersPanel placeOrdersPanel){
         super();
         this.liveOrderBook = liveOrderBook;
         this.orderService = orderService;
