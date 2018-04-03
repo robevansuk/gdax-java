@@ -8,42 +8,34 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
-import static com.coinbase.exchange.api.constants.GdaxConstants.MARKET;
+import static com.coinbase.exchange.api.constants.GdaxConstants.LIMIT;
 
 @Component
-public class MarketOrdersPanel extends JPanel {
+public class LimitOrdersPanel extends JPanel {
 
-    private static final Logger log = LoggerFactory.getLogger(MarketOrdersPanel.class);
+    private static final Logger log = LoggerFactory.getLogger(LimitOrdersPanel.class);
 
     private GdaxLiveOrderBook liveOrderBook;
     private JTextField funds;
     private OrderService orderService;
     private BalancePanel balancePanel;
     private ActiveOrdersPanel placeOrdersPanel;
-    private JTextField sizeOfOrder;
+    private JTextField limitPriceField;
+    private JTextField amountOfCurrencyField;
     private JButton buyButton;
     private JButton sellButton;
     private JLabel placeOrder;
     private JLabel total;
 
     @Autowired
-    public MarketOrdersPanel(GdaxLiveOrderBook liveOrderBook,
-                             OrderService orderService,
-                             BalancePanel balancePanel,
-                             ActiveOrdersPanel placeOrdersPanel){
+    public LimitOrdersPanel(GdaxLiveOrderBook liveOrderBook,
+                            OrderService orderService,
+                            BalancePanel balancePanel,
+                            ActiveOrdersPanel placeOrdersPanel) {
         super();
         this.liveOrderBook = liveOrderBook;
         this.orderService = orderService;
@@ -51,8 +43,7 @@ public class MarketOrdersPanel extends JPanel {
         this.placeOrdersPanel = placeOrdersPanel;
     }
 
-    public void init(){
-        balancePanel.init();
+    public void init() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
@@ -64,19 +55,27 @@ public class MarketOrdersPanel extends JPanel {
         placeOrder.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                Order marketOrder = createMarketOrder(liveOrderBook.getSelectedProductId());
+                Order marketOrder = createLimitOrder(liveOrderBook.getSelectedProductId());
                 Order responseOrder = orderService.createOrder(marketOrder);
                 log.info("ORDER PLACED: {}", responseOrder.toString());
                 placeOrdersPanel.update(responseOrder);
             }
+
             @Override
-            public void mousePressed(MouseEvent e) {}
+            public void mousePressed(MouseEvent e) {
+            }
+
             @Override
-            public void mouseReleased(MouseEvent e) {}
+            public void mouseReleased(MouseEvent e) {
+            }
+
             @Override
-            public void mouseEntered(MouseEvent e) {}
+            public void mouseEntered(MouseEvent e) {
+            }
+
             @Override
-            public void mouseExited(MouseEvent e) {}
+            public void mouseExited(MouseEvent e) {
+            }
         });
 
         buyButton = new JButton("BUY");
@@ -85,7 +84,6 @@ public class MarketOrdersPanel extends JPanel {
         sellButton.setForeground(Color.GRAY);
 
         total = new JLabel("0.00");
-        balancePanel.getCurrencyLabel().setText(balancePanel.getFromCurrency() + " ");
 
         buyButton.addActionListener((ActionEvent e) -> {
             buyButton.setForeground(Color.GREEN);
@@ -104,33 +102,65 @@ public class MarketOrdersPanel extends JPanel {
             total.setText("0.00 " + balancePanel.getToCurrency());
         });
 
-        sizeOfOrder = new JTextField("", 20);
-        sizeOfOrder.addKeyListener(new KeyListener() {
+        amountOfCurrencyField = new JTextField("", 20);
+        amountOfCurrencyField.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
                 validate();
             }
+
             @Override
             public void keyPressed(KeyEvent e) {
                 validate();
             }
+
             @Override
             public void keyReleased(KeyEvent e) {
                 validate();
             }
 
             public void validate() {
-                if (sizeOfOrder.getText().length() == 0) {
-                    sizeOfOrder.setBackground(Color.WHITE);
-                } else if (!sizeOfOrder.getText().matches("[0-9]*[\\.]*[0-9]*")) {
-                    sizeOfOrder.setBackground(Color.PINK);
+                if (amountOfCurrencyField.getText().length() == 0) {
+                    amountOfCurrencyField.setBackground(Color.PINK);
+                } else if (!amountOfCurrencyField.getText().matches("[0-9]*[\\.]*[0-9]*")) {
+                    amountOfCurrencyField.setBackground(Color.PINK);
                 } else {
-                    sizeOfOrder.setBackground(Color.WHITE);
+                    amountOfCurrencyField.setBackground(Color.WHITE);
                 }
             }
         });
-        JPanel sizeOfOrderPanel = new JPanel();
-        sizeOfOrderPanel.add(sizeOfOrder);
+        JPanel textFieldPanel = new JPanel();
+        textFieldPanel.add(amountOfCurrencyField);
+
+        limitPriceField = new JTextField("", 20);
+        limitPriceField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                validate();
+            }
+
+            @Override
+            public void keyPressed(KeyEvent e) {
+                validate();
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                validate();
+            }
+
+            public void validate() {
+                if (limitPriceField.getText().length() == 0) {
+                    limitPriceField.setBackground(Color.WHITE);
+                } else if (!limitPriceField.getText().matches("[0-9]*[\\.]*[0-9]*")) {
+                    limitPriceField.setBackground(Color.PINK);
+                } else {
+                    limitPriceField.setBackground(Color.WHITE);
+                }
+            }
+        });
+        JPanel limitPriceFieldPanel = new JPanel();
+        limitPriceFieldPanel.add(limitPriceField);
 
         orderSidePanel.add(buyButton);
         orderSidePanel.add(sellButton);
@@ -146,7 +176,8 @@ public class MarketOrdersPanel extends JPanel {
 
         panel.add(buttonsPanel);
         panel.add(currencyLabelPanel);
-        panel.add(sizeOfOrderPanel);
+        panel.add(textFieldPanel);
+        panel.add(limitPriceFieldPanel);
         panel.add(totalPanel);
         panel.add(placeOrderPanel);
 
@@ -156,11 +187,12 @@ public class MarketOrdersPanel extends JPanel {
         this.add(mainPanel);
     }
 
-    private Order createMarketOrder(String productId) {
+    private Order createLimitOrder(String productId) {
         Order order = new Order();
         order.setProduct_id(productId);
-        order.setType(MARKET.toLowerCase());
-        order.setSize(sizeOfOrder.getText());
+        order.setType(LIMIT.toLowerCase());
+        order.setPrice(limitPriceField.getText());
+        order.setFunds(amountOfCurrencyField.getText());
         log.info("Making Order: {}, {}, {}", order.getType(), order.getProduct_id(), order.getFunds());
         return order;
     }

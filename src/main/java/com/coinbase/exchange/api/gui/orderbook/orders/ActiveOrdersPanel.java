@@ -37,6 +37,7 @@ public class ActiveOrdersPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(placedOrdersList);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         JPanel scrollPaneInPanel = new JPanel();
+        scrollPaneInPanel.setLayout(new BorderLayout());
         scrollPaneInPanel.add(scrollPane);
         scrollPaneInPanel.setSize(1200, scrollPaneInPanel.getHeight());
 

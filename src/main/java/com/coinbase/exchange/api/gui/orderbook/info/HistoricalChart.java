@@ -2,6 +2,7 @@ package com.coinbase.exchange.api.gui.orderbook.info;
 
 import com.coinbase.exchange.api.gui.orderbook.GdaxLiveOrderBook;
 import com.coinbase.exchange.api.products.ProductService;
+import com.coinbase.exchange.api.websocketfeed.message.OrderBookMessage;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -20,10 +21,8 @@ import org.jfree.data.xy.XYDataset;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.swing.BoxLayout;
-import javax.swing.JPanel;
-import java.awt.Color;
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
@@ -36,6 +35,8 @@ public class HistoricalChart extends JPanel {
 
     private GdaxLiveOrderBook liveOrderBook;
     private ProductService productService;
+    private XYDataset dataset;
+    private XYPlot mainPlot;
 
     @Autowired
     public HistoricalChart(GdaxLiveOrderBook liveOrderBook, ProductService productService) {
@@ -54,12 +55,13 @@ public class HistoricalChart extends JPanel {
     private ChartPanel createCandleStickChart() {
         String selectedProductId = liveOrderBook.getSelectedProductId();
         List<List<BigDecimal>> historicalRates = productService.getHistoricRates(selectedProductId);
+
         DateAxis domainAxis = new DateAxis("Date");
         NumberAxis rangeAxis = new NumberAxis("Price");
         CandlestickRenderer renderer = new CandlestickRenderer();
-        XYDataset dataset = getDataSet(selectedProductId);
+        dataset = getDataSet(selectedProductId, historicalRates);
 
-        XYPlot mainPlot = new XYPlot(dataset, domainAxis, rangeAxis, renderer);
+        mainPlot = new XYPlot(dataset, domainAxis, rangeAxis, renderer);
 
         //Do some setting up, see the API Doc
         renderer.setSeriesPaint(0, Color.BLACK);
@@ -67,13 +69,12 @@ public class HistoricalChart extends JPanel {
         rangeAxis.setAutoRangeIncludesZero(false);
         domainAxis.setTimeline(getTimeline(selectedProductId, historicalRates));
 
-        //Now create the chart and chart panel
-        JFreeChart chart = new JFreeChart(selectedProductId, null, mainPlot, false);
+        // Now create the chart and chart panel
+        JFreeChart chart = new JFreeChart("", null, mainPlot, false);
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(600, 300));
         return chartPanel;
     }
-
 
     private Timeline getTimeline(String selectedProductId, List<List<BigDecimal>> historicalRates) {
         DateAxis dateAxis = new DateAxis(selectedProductId);
@@ -101,16 +102,11 @@ public class HistoricalChart extends JPanel {
     }
 
 
-    protected AbstractXYDataset getDataSet(String productId) {
-        //This is the dataset we are going to create
-        DefaultOHLCDataset result = null;
-        //This is the data needed for the dataset
-        List<List<BigDecimal>> historicalRates = productService.getHistoricRates(productId);
-
+    protected AbstractXYDataset getDataSet(String productId, List<List<BigDecimal>> historicalRates) {
         OHLCDataItem[] data = toArrayOfOHLCDataItems(historicalRates);
 
-        //Create a dataset, an Open, High, Low, Close dataset
-        result = new DefaultOHLCDataset(productId, data);
+        //Create a dataset: Timestamp: Open, High, Low, Close, Volume
+        DefaultOHLCDataset result = new DefaultOHLCDataset(productId, data);
 
         return result;
     }
@@ -168,5 +164,9 @@ public class HistoricalChart extends JPanel {
     private Long getTime(List<BigDecimal> historicalRate) {
         Long finalTime = Long.parseLong(historicalRate.get(0).toString());
         return finalTime;
+    }
+
+    public void priceTick(OrderBookMessage matchOrder) {
+
     }
 }

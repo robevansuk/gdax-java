@@ -21,19 +21,23 @@ public class MakeOrdersPanel extends JPanel {
     private MarketOrdersPanel marketOrdersPanel;
     private BalancePanel balancePanel;
     private JTabbedPane tabs;
+    private LimitOrdersPanel limitOrdersPanel;
 
     @Autowired
     public MakeOrdersPanel(MarketOrdersPanel marketOrdersPanel,
-                            BalancePanel balancePanel) {
+                           LimitOrdersPanel limitOrdersPanel,
+                           BalancePanel balancePanel) {
         super();
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.balancePanel = balancePanel;
         this.marketOrdersPanel = marketOrdersPanel;
+        this.limitOrdersPanel = limitOrdersPanel;
     }
 
     public JPanel init() {
         balancePanel.init();
         marketOrdersPanel.init();
+        limitOrdersPanel.init();
 
         this.add(balancePanel);
         this.add(createOrderTabs());
@@ -48,7 +52,7 @@ public class MakeOrdersPanel extends JPanel {
             if (tabName.equals(MARKET)) {
                 tabs.addTab(tabName, null, marketOrdersPanel,"Make " + gdaxTabNames[i] + " Orders");
             } else if (tabName.equals(LIMIT)) {
-                tabs.addTab(tabName, null, createLimitTab(),"Make " + gdaxTabNames[i] + " Orders");
+                tabs.addTab(tabName, null, limitOrdersPanel, "Make " + gdaxTabNames[i] + " Orders");
             } else if (tabName.equals(STOP)) {
                 tabs.addTab(tabName, null, createStopTab(),"Make " + gdaxTabNames[i] + " Orders");
             }
@@ -57,11 +61,6 @@ public class MakeOrdersPanel extends JPanel {
             i++;
         }
         return tabs;
-    }
-
-    public JPanel createLimitTab(){
-        JPanel panel = new JPanel();
-        return panel;
     }
 
     public JPanel createStopTab(){
