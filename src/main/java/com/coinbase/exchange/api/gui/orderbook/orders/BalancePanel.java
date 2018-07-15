@@ -43,8 +43,8 @@ public class BalancePanel extends JPanel {
     }
 
     public void init(){
-        fromCurrency = liveOrderBook.getSelectedProductId().split("-")[0];
-        toCurrency = liveOrderBook.getSelectedProductId().split("-")[1];
+        fromCurrency = liveOrderBook.getSelectedProductId().split("-")[1];
+        toCurrency = liveOrderBook.getSelectedProductId().split("-")[0];
         currencyLabel = new JLabel(fromCurrency + " ");
         total = new JLabel("0.00000000 " + fromCurrency);
 

@@ -18,6 +18,7 @@ import static com.coinbase.exchange.api.constants.GdaxConstants.LIMIT;
 public class LimitOrdersPanel extends JPanel {
 
     private static final Logger log = LoggerFactory.getLogger(LimitOrdersPanel.class);
+    private static final String moneyRegex = "[0-9]*[\\.]*[0-9]*";
 
     private GdaxLiveOrderBook liveOrderBook;
     private JTextField funds;
@@ -30,6 +31,7 @@ public class LimitOrdersPanel extends JPanel {
     private JButton sellButton;
     private JLabel placeOrder;
     private JLabel total;
+    private JLabel fromCurrencyLabel;
 
     @Autowired
     public LimitOrdersPanel(GdaxLiveOrderBook liveOrderBook,
@@ -50,88 +52,54 @@ public class LimitOrdersPanel extends JPanel {
         JPanel orderSidePanel = new JPanel();
         orderSidePanel.setLayout(new GridLayout(1, 2));
 
-        placeOrder = new JLabel("Place Buy Order");
+        createPlaceOrderButton();
 
-        placeOrder.addMouseListener(new MouseListener() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                Order marketOrder = createLimitOrder(liveOrderBook.getSelectedProductId());
-                Order responseOrder = orderService.createOrder(marketOrder);
-                log.info("ORDER PLACED: {}", responseOrder.toString());
-                placeOrdersPanel.update(responseOrder);
-            }
-
-            @Override
-            public void mousePressed(MouseEvent e) {
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-            }
-
-            @Override
-            public void mouseEntered(MouseEvent e) {
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-            }
-        });
-
-        buyButton = new JButton("BUY");
-        buyButton.setForeground(Color.GREEN);
-        sellButton = new JButton("SELL");
-        sellButton.setForeground(Color.GRAY);
+        createBuyButton();
+        createSellButton();
 
         total = new JLabel("0.00");
 
-        buyButton.addActionListener((ActionEvent e) -> {
-            buyButton.setForeground(Color.GREEN);
-            sellButton.setForeground(Color.GRAY);
-            balancePanel.getCurrencyLabel().setText(balancePanel.getFromCurrency() + " ");
-            placeOrder.setText("Place Buy Order");
-            placeOrder.setForeground(Color.GREEN);
-            total.setText("0.00000000 " + balancePanel.getFromCurrency());
-        });
-        sellButton.addActionListener((ActionEvent e) -> {
-            sellButton.setForeground(Color.RED);
-            buyButton.setForeground(Color.GRAY);
-            balancePanel.getCurrencyLabel().setText(balancePanel.getToCurrency() + " ");
-            placeOrder.setText("Place Sell Order");
-            placeOrder.setForeground(Color.RED);
-            total.setText("0.00 " + balancePanel.getToCurrency());
-        });
+        addBuyButtonMouseListener();
+        addSellButtonMouseListener();
 
-        amountOfCurrencyField = new JTextField("", 20);
-        amountOfCurrencyField.addKeyListener(new KeyListener() {
-            @Override
-            public void keyTyped(KeyEvent e) {
-                validate();
-            }
+        JPanel amountOfCurrencyPanel = getAmountOfCurrencyPanel();
 
-            @Override
-            public void keyPressed(KeyEvent e) {
-                validate();
-            }
+        JPanel limitPriceFieldPanel = getLimitPricePanel();
 
-            @Override
-            public void keyReleased(KeyEvent e) {
-                validate();
-            }
+        orderSidePanel.add(buyButton);
+        orderSidePanel.add(sellButton);
 
-            public void validate() {
-                if (amountOfCurrencyField.getText().length() == 0) {
-                    amountOfCurrencyField.setBackground(Color.PINK);
-                } else if (!amountOfCurrencyField.getText().matches("[0-9]*[\\.]*[0-9]*")) {
-                    amountOfCurrencyField.setBackground(Color.PINK);
-                } else {
-                    amountOfCurrencyField.setBackground(Color.WHITE);
-                }
-            }
-        });
-        JPanel textFieldPanel = new JPanel();
-        textFieldPanel.add(amountOfCurrencyField);
+        JPanel buttonsPanel = new JPanel();
+        buttonsPanel.add(orderSidePanel);
 
+        JPanel totalPanel = new JPanel();
+        totalPanel.add(total);
+
+        JPanel placeOrderPanel = new JPanel();
+        placeOrderPanel.add(placeOrder);
+
+        JPanel currencyLabelPanel = new JPanel();
+        currencyLabelPanel.add(balancePanel.getCurrencyLabel());
+
+
+        panel.add(buttonsPanel);
+        panel.add(currencyLabelPanel);
+        panel.add(amountOfCurrencyPanel);
+        panel.add(limitPriceFieldPanel);
+        panel.add(totalPanel);
+        panel.add(placeOrderPanel);
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.add(panel);
+
+        this.add(mainPanel);
+    }
+
+    private JPanel getLimitPricePanel() {
+
+        String limitPriceCurrency = liveOrderBook.getSelectedProductId().split("-")[0];
+
+        JLabel limitPriceCurrencyLabel = new JLabel(limitPriceCurrency);
         limitPriceField = new JTextField("", 20);
         limitPriceField.addKeyListener(new KeyListener() {
             @Override
@@ -152,39 +120,115 @@ public class LimitOrdersPanel extends JPanel {
             public void validate() {
                 if (limitPriceField.getText().length() == 0) {
                     limitPriceField.setBackground(Color.WHITE);
-                } else if (!limitPriceField.getText().matches("[0-9]*[\\.]*[0-9]*")) {
-                    limitPriceField.setBackground(Color.PINK);
                 } else {
-                    limitPriceField.setBackground(Color.WHITE);
+                    if (!limitPriceField.getText().matches(moneyRegex)) {
+                        limitPriceField.setBackground(Color.PINK);
+                    } else {
+                        limitPriceField.setBackground(Color.WHITE);
+                    }
                 }
             }
         });
         JPanel limitPriceFieldPanel = new JPanel();
+        limitPriceFieldPanel.add(limitPriceCurrencyLabel);
         limitPriceFieldPanel.add(limitPriceField);
+        return limitPriceFieldPanel;
+    }
 
-        orderSidePanel.add(buyButton);
-        orderSidePanel.add(sellButton);
-        JPanel buttonsPanel = new JPanel();
-        buttonsPanel.add(orderSidePanel);
+    private JPanel getAmountOfCurrencyPanel() {
+        fromCurrencyLabel = new JLabel(balancePanel.getFromCurrency());
+        amountOfCurrencyField = new JTextField("", 20);
+        amountOfCurrencyField.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                validate();
+            }
 
-        JPanel totalPanel = new JPanel();
-        totalPanel.add(total);
-        JPanel placeOrderPanel = new JPanel();
-        placeOrderPanel.add(placeOrder);
-        JPanel currencyLabelPanel = new JPanel();
-        currencyLabelPanel.add(balancePanel.getCurrencyLabel());
+            @Override
+            public void keyPressed(KeyEvent e) {
+                validate();
+            }
 
-        panel.add(buttonsPanel);
-        panel.add(currencyLabelPanel);
-        panel.add(textFieldPanel);
-        panel.add(limitPriceFieldPanel);
-        panel.add(totalPanel);
-        panel.add(placeOrderPanel);
+            @Override
+            public void keyReleased(KeyEvent e) {
+                validate();
+            }
 
-        JPanel mainPanel = new JPanel();
-        mainPanel.add(panel);
+            public void validate() {
+                if (amountOfCurrencyField.getText().length() == 0) {
+                    amountOfCurrencyField.setBackground(Color.PINK);
+                } else if (!amountOfCurrencyField.getText().matches(moneyRegex)) {
+                    amountOfCurrencyField.setBackground(Color.PINK);
+                } else {
+                    amountOfCurrencyField.setBackground(Color.WHITE);
+                }
+            }
+        });
+        JPanel textFieldPanel = new JPanel();
+        textFieldPanel.add(fromCurrencyLabel);
+        textFieldPanel.add(amountOfCurrencyField);
+        return textFieldPanel;
+    }
 
-        this.add(mainPanel);
+    private void addSellButtonMouseListener() {
+        sellButton.addActionListener((ActionEvent e) -> {
+            sellButton.setForeground(Color.RED);
+            buyButton.setForeground(Color.GRAY);
+            balancePanel.getCurrencyLabel().setText(balancePanel.getToCurrency() + " ");
+            placeOrder.setText("Place Sell Order");
+            placeOrder.setForeground(Color.RED);
+            total.setText("0.00 " + balancePanel.getToCurrency());
+        });
+    }
+
+    private void addBuyButtonMouseListener() {
+        buyButton.addActionListener((ActionEvent e) -> {
+            buyButton.setForeground(Color.GREEN);
+            sellButton.setForeground(Color.GRAY);
+            balancePanel.getCurrencyLabel().setText(balancePanel.getFromCurrency() + " ");
+            placeOrder.setText("Place Buy Order");
+            placeOrder.setForeground(Color.GREEN);
+            total.setText("0.00000000 " + balancePanel.getFromCurrency());
+        });
+    }
+
+    private void createSellButton() {
+        sellButton = new JButton("SELL");
+        sellButton.setForeground(Color.GRAY);
+    }
+
+    private void createBuyButton() {
+        buyButton = new JButton("BUY");
+        buyButton.setForeground(Color.GREEN);
+    }
+
+    private void createPlaceOrderButton() {
+        placeOrder = new JLabel("Place Buy Order");
+
+        placeOrder.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Order marketOrder = createLimitOrder(liveOrderBook.getSelectedProductId());
+                Order responseOrder = orderService.createOrder(marketOrder);
+                log.info("ORDER PLACED: {}", responseOrder.toString());
+                placeOrdersPanel.update(responseOrder);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+            }
+        });
     }
 
     private Order createLimitOrder(String productId) {
