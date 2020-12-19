@@ -183,7 +183,7 @@ The WebsocketFeed is implemented and works. To use the WSF check out the API doc
 # TODO
 -------
 - add pagination versions of all endpoints, or offer a way to append to the endpoint urls.
-- build out the GUI more
+- smarted up the GUI
 
 
 From the GDAX API documentation:
